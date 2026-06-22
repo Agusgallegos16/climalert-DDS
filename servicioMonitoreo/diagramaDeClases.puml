@@ -1,0 +1,49 @@
+@startuml
+
+abstract class ProveedorMeteorologico{
+    + obtenerDato() : Dato
+}
+
+class WeatherApiAdapter extends ProveedorMeteorologico{
+    + obtenerDato() : Dato
+}
+
+class SistemaClimalert{
+    - datoActual : Dato
+    - historialDeDatos() : <Dato>
+    - proveedor : ProveedorMeteorologico
+    + obtenerDato(proveedor) : Dato
+}
+
+Record Dato{
+    - temperatura : double
+    - humedad : double
+    - ubicacion : String
+    - fechaHora : LocalDateTime
+}
+
+interface EvaluadorCondicion{
+    + evaluarCondiciones(Dato) : Bool
+}
+
+class AlertaTemperaturaHumedadAltas extends EvaluadorCondicion{
+    + evaluarCondiciones(Dato) : Bool
+}
+
+Record Notificacion{
+    - detalle : Dato
+    - destinatario : String
+}
+
+class NotificadorEmail{
+    + armarNotificacion(Dato) : Notificacion
+    + despachar(Notificacion) : void
+}
+
+ProveedorMeteorologico -> Dato
+EvaluadorCondicion ..> Dato
+NotificadorEmail -> Notificacion
+SistemaClimalert -> "*"Dato
+SistemaClimalert -> ProveedorMeteorologico
+
+@enduml
