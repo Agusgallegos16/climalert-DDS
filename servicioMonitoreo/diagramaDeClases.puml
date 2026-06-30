@@ -1,52 +1,87 @@
 @startuml
 
-interface ProveedorMeteorologico{
+interface ProveedorMeteorologico {
     + obtenerDato() : Dato
 }
 
-class WeatherApiAdapter implements ProveedorMeteorologico{
+class WeatherApiAdapter implements ProveedorMeteorologico {
     + obtenerDato() : Dato
 }
 
-class SistemaClimalert{
-    - datoClimaActual : Dato
-    - historialDeClimas : <Dato>
-    - proveedor : ProveedorMeteorologico
-    - alertasProgramadas : <Alerta>
-
-    + obtenerDato() : Dato
+class SistemaClimalert {
+    - historialClimas : List<Dato>
+    - alertasProgramadas : List<Alerta>
+    + registrarAlerta(Alerta) : void
+    + registrarYEvaluarClima(Dato) : List<Alerta>
 }
 
-Record Dato{
+Record Dato {
     - temperatura : double
     - humedad : double
     - ubicacion : String
     - fechaHora : LocalDateTime
 }
 
-class Alerta{
-    + evaluarCondiciones(Dato) : Bool
+interface Alerta {
+    + evaluarCondiciones(Dato) : boolean
+    + obtenerMensajeDeAdvertencia(Dato) : String
 }
 
-class AlertaTemperaturaHumedadAltas implements Alerta{
-    + evaluarCondiciones(Dato) : Bool
+class AlertaTemperatura implements Alerta {
+    - umbralTemperatura : double
+    + evaluarCondiciones(Dato) : boolean
+    + obtenerMensajeDeAdvertencia(Dato) : String
 }
 
-Record Notificacion{
+class AlertaHumedad implements Alerta {
+    - umbralHumedad : double
+    + evaluarCondiciones(Dato) : boolean
+    + obtenerMensajeDeAdvertencia(Dato) : String
+}
+
+enum OperadorLogico {
+    AND
+    OR
+}
+
+class AlertaCompuesta implements Alerta {
+    - alertas : List<Alerta>
+    - operador : OperadorLogico
+    + evaluarCondiciones(Dato) : boolean
+    + obtenerMensajeDeAdvertencia(Dato) : String
+}
+
+Record Notificacion {
     - detalle : Dato
     - destinatario : String
+    - mensaje : String
 }
 
-class NotificadorEmail{
-    + armarNotificacion(Dato) : Notificacion
+interface NotificadorPort {
+    + armarNotificacion(Dato, String, String) : Notificacion
     + despachar(Notificacion) : void
 }
 
+class NotificadorEmail implements NotificadorPort {
+    + armarNotificacion(Dato, String, String) : Notificacion
+    + despachar(Notificacion) : void
+}
+
+class ClimalertApplicationService {
+    - proveedorMeteorologico : ProveedorMeteorologico
+    - notificadorEmail : NotificadorPort
+    - destinatariosAlerta : List<String>
+    + procesarMonitoreoClimatico(SistemaClimalert) : void
+}
+
 ProveedorMeteorologico -> Dato
-NotificadorEmail -> Notificacion
-SistemaClimalert -> "*"Dato
-SistemaClimalert -> ProveedorMeteorologico
+NotificadorPort -> Notificacion
+SistemaClimalert -> "*" Dato
 SistemaClimalert -> "*" Alerta
+AlertaCompuesta -> "*" Alerta
+AlertaCompuesta -> OperadorLogico
+ClimalertApplicationService -> ProveedorMeteorologico
+ClimalertApplicationService -> NotificadorPort
 Alerta ..> Dato
 
 @enduml

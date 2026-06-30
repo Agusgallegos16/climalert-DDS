@@ -1,32 +1,27 @@
 package ar.edu.utn.frba.dds.serviciomonitoreo.domain;
 
+import lombok.Builder;
 import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Builder
 public class SistemaClimalert {
   @Getter
-  private Dato datoClimaActual;
-  private List<Dato> historialClimas;
-  private ProveedorMeteorologico proveedor;
-  private List<Alerta> alertasProgramadas;
-
-  public SistemaClimalert(ProveedorMeteorologico proveedor) {
-    this.proveedor = proveedor;
-    this.historialClimas = new ArrayList<>();
-    this.alertasProgramadas = new ArrayList<>();
-  }
+  private List<Dato> historialClimas = new ArrayList<>();
+  private List<Alerta> alertasProgramadas = new ArrayList<>();
 
   public void registrarAlerta(Alerta alerta) {
     this.alertasProgramadas.add(alerta);
   }
 
-  public Dato obtenerDato() {
-    Dato nuevoDato = proveedor.obtenerDato();
-    this.datoClimaActual = nuevoDato;
+  public List<Alerta> registrarYEvaluarClima(Dato nuevoDato) {
     this.historialClimas.add(nuevoDato);
-    return nuevoDato;
+
+    return alertasProgramadas.stream()
+        .filter(alerta -> alerta.evaluarCondiciones(nuevoDato))
+        .toList();
   }
 
 }
