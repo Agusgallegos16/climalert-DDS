@@ -9,18 +9,22 @@ import java.util.List;
 @Builder
 public class SistemaClimalert {
   @Getter
+  @Builder.Default
   private List<Dato> historialClimas = new ArrayList<>();
+  @Builder.Default
   private List<Alerta> alertasProgramadas = new ArrayList<>();
 
   public void registrarAlerta(Alerta alerta) {
     this.alertasProgramadas.add(alerta);
   }
 
-  public List<Alerta> registrarYEvaluarClima(Dato nuevoDato) {
+  public void registrarClima(Dato nuevoDato){
     this.historialClimas.add(nuevoDato);
+  }
 
+  public List<Alerta> evaluarAlertas(Dato dato) {
     return alertasProgramadas.stream()
-        .filter(alerta -> alerta.evaluarCondiciones(nuevoDato))
+        .filter(alerta -> alerta.evaluarCondiciones(dato))
         .toList();
   }
 

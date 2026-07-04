@@ -18,6 +18,14 @@ class SistemaClimalert {
 Record Dato {
     - temperatura : double
     - humedad : double
+    - presion : double
+    - vientoVelocidad : double
+    - vientoDireccion : String
+    - precipitacion : double
+    - nubes : int
+    - sensacionTermica : double
+    - uv : double
+    - condicionTexto : String
     - ubicacion : String
     - fechaHora : LocalDateTime
 }
@@ -67,21 +75,14 @@ class NotificadorEmail implements NotificadorPort {
     + despachar(Notificacion) : void
 }
 
-class ClimalertApplicationService {
-    - proveedorMeteorologico : ProveedorMeteorologico
-    - notificadorEmail : NotificadorPort
-    - destinatariosAlerta : List<String>
-    + procesarMonitoreoClimatico(SistemaClimalert) : void
-}
-
 ProveedorMeteorologico -> Dato
 NotificadorPort -> Notificacion
+NotificadorPort -> Dato
 SistemaClimalert -> "*" Dato
 SistemaClimalert -> "*" Alerta
 AlertaCompuesta -> "*" Alerta
 AlertaCompuesta -> OperadorLogico
-ClimalertApplicationService -> ProveedorMeteorologico
-ClimalertApplicationService -> NotificadorPort
 Alerta ..> Dato
+
 
 @enduml
